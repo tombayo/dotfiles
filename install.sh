@@ -16,7 +16,7 @@ set -e
 
 # Paths
 DOTFILES_DIR="$HOME/.dotfiles"
-DOTFILES_LOG="$DOTFILES/.dotfiles.log"
+DOTFILES_LOG="$DOTFILES_DIR/.dotfiles.log"
 GIT_REPO_URL="https://github.com/tombayo/ansible-role-dotfiles.git"
 ANSIBLE_MAIN_PLAYBOOK="$DOTFILES/main.yml"
 ANSIBLE_GALAXY_REQUIREMENTS="$DOTFILES/requirements.yml"
