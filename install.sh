@@ -72,7 +72,7 @@ function install_ansible_git() {
 
 function update_ansible_galaxy() {
   _task "Updating Ansible Galaxy"
-  _cmd "ansible-galaxy install -r $ANSIBLE_GALAXY_REQUIREMENTS"
+  _cmd "ansible-galaxy install --force -r $ANSIBLE_GALAXY_REQUIREMENTS"
 }
 
 function clone_repository() {
