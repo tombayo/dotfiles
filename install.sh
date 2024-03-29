@@ -61,11 +61,12 @@ function _task_done {
   TASK=""
 }
 
-function install_ansible() {
-  _task "Installing Ansible"
+function install_ansible_git() {
+  _task "Installing Ansible and git"
   if ! dpkg -s ansible >/dev/null 2>&1; then
     _cmd "sudo apt-get update"
     _cmd "sudo apt-get install -y ansible"
+    _cmd "sudo apt-get install -y git"
   fi
 }
 
@@ -74,15 +75,19 @@ function update_ansible_galaxy() {
   _cmd "ansible-galaxy install -r $ANSIBLE_GALAXY_REQUIREMENTS"
 }
 
-if ! [[ -d "$DOTFILES_DIR" ]]; then
-  _task "Cloning repository"
-  _cmd "git clone --quiet $GIT_REPO_URL $DOTFILES_DIR"
-else
-  _task "Updating repository"
-  _cmd "git -C $DOTFILES_DIR pull --quiet"
-fi
+function clone_repository() {
+  if ! [[ -d "$DOTFILES_DIR" ]]; then
+    _task "Cloning repository"
+    _cmd "git clone --quiet $GIT_REPO_URL $DOTFILES_DIR"
+  else
+    _task "Updating repository"
+    _cmd "git -C $DOTFILES_DIR pull --quiet"
+  fi
+}
 
-install_ansible
+
+install_ansible_git
+clone_repository
 update_ansible_galaxy
 
 _task "Running playbook"; _task_done
