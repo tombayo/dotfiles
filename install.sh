@@ -91,4 +91,4 @@ clone_repository
 update_ansible_galaxy
 
 _task "Running playbook"; _task_done
-ansible-playbook "$ANSIBLE_MAIN_PLAYBOOK"
+ansible-playbook "$ANSIBLE_MAIN_PLAYBOOK" --ask-become-pass
