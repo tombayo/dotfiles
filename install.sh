@@ -17,20 +17,19 @@ set -e
 # Paths
 DOTFILES_DIR="$HOME/.dotfiles"
 DOTFILES_LOG="$HOME/.dotfiles.log"
-GIT_REPO_URL="https://github.com/tombayo/ansible-role-dotfiles.git"
-ANSIBLE_MAIN_PLAYBOOK="$DOTFILES/main.yml"
-ANSIBLE_GALAXY_REQUIREMENTS="$DOTFILES/requirements.yml"
+GIT_REPO_URL="https://github.com/tombayo/dotfiles.git"
+ANSIBLE_MAIN_PLAYBOOK="$DOTFILES_DIR/main.yml"
+ANSIBLE_GALAXY_REQUIREMENTS="$DOTFILES_DIR/requirements.yml"
 
 # _header colorize the given argument with spacing
 function _task {
   # if _task is called while a task was set, complete the previous
   if [[ $TASK != "" ]]; then
-    echo "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}"
+    _task_done
   fi
   # set new task title and print
   TASK=$1
-  echo "${LBLACK} [ ]  ${TASK} "
-  echo "${LRED}"
+  printf "${LBLACK} [ ]  ${TASK} \n${LRED}"
 }
 
 # _cmd performs commands with error checking
@@ -46,9 +45,9 @@ function _cmd {
     return 0 # success
   fi
   # read error from log and add spacing
-  echo "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}"
-  while read -r line; do
-    echo "      ${line}"
+  printf "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}\n"
+  while read line; do
+    printf "      ${line}\n"
   done < "$DOTFILES_LOG"
   printf "\n"
   # remove log file
@@ -57,13 +56,9 @@ function _cmd {
   exit 1
 }
 
-function _clear_task {
-  TASK=""
-}
-
 function _task_done {
-  echo "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}"
-  _clear_task
+  printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}\n"
+  TASK=""
 }
 
 function install_ansible() {
