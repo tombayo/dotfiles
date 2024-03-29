@@ -1,0 +1,5 @@
+---
+roles:
+  - name: tombayo.dotfiles
+    src: https://github.com/tombayo/ansible-role-dotfiles.git
+    scm: git

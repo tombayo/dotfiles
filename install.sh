@@ -1,0 +1,94 @@
+#!/bin/bash
+
+###
+### Mainly copied from https://github.com/TechDufus/dotfiles
+### Credits to TechDufus
+###
+
+# color codes
+LBLACK='\033[01;30m'
+LRED='\033[01;31m'
+LGREEN='\033[01;32m'
+OVERWRITE='\e[1A\e[K'
+
+# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html#index-set
+set -e
+
+# Paths
+DOTFILES_DIR="$HOME/.dotfiles"
+DOTFILES_LOG="$DOTFILES/.dotfiles.log"
+GIT_REPO_URL="https://github.com/tombayo/ansible-role-dotfiles.git"
+ANSIBLE_MAIN_PLAYBOOK="$DOTFILES/main.yml"
+ANSIBLE_GALAXY_REQUIREMENTS="$DOTFILES/requirements.yml"
+
+# _header colorize the given argument with spacing
+function _task {
+  # if _task is called while a task was set, complete the previous
+  if [[ $TASK != "" ]]; then
+    echo "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}"
+  fi
+  # set new task title and print
+  TASK=$1
+  echo "${LBLACK} [ ]  ${TASK} "
+  echo "${LRED}"
+}
+
+# _cmd performs commands with error checking
+function _cmd {
+  #create log if it doesn't exist
+  if ! [[ -f $DOTFILES_LOG ]]; then
+    touch "$DOTFILES_LOG"
+  fi
+  # empty conduro.log
+  echo "" > "$DOTFILES_LOG"
+  # hide stdout, on error we print and exit
+  if eval "$1" 1> /dev/null 2> "$DOTFILES_LOG"; then
+    return 0 # success
+  fi
+  # read error from log and add spacing
+  echo "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}"
+  while read -r line; do
+    echo "      ${line}"
+  done < "$DOTFILES_LOG"
+  printf "\n"
+  # remove log file
+  rm "$DOTFILES_LOG"
+  # exit installation
+  exit 1
+}
+
+function _clear_task {
+  TASK=""
+}
+
+function _task_done {
+  echo "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}"
+  _clear_task
+}
+
+function install_ansible() {
+  _task "Installing Ansible"
+  if ! dpkg -s ansible >/dev/null 2>&1; then
+    _cmd "sudo apt-get update"
+    _cmd "sudo apt-get install -y ansible"
+  fi
+}
+
+function update_ansible_galaxy() {
+  _task "Updating Ansible Galaxy"
+  _cmd "ansible-galaxy install -r $ANSIBLE_GALAXY_REQUIREMENTS"
+}
+
+if ! [[ -d "$DOTFILES_DIR" ]]; then
+  _task "Cloning repository"
+  _cmd "git clone --quiet $GIT_REPO_URL $DOTFILES_DIR"
+else
+  _task "Updating repository"
+  _cmd "git -C $DOTFILES_DIR pull --quiet"
+fi
+
+install_ansible
+update_ansible_galaxy
+
+_task "Running playbook"; _task_done
+ansible-playbook "$ANSIBLE_MAIN_PLAYBOOK"
